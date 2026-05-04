@@ -6,9 +6,7 @@ export default function Prices() {
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('all')
 
-  useEffect(() => {
-    fetchPrices()
-  }, [])
+  useEffect(() => { fetchPrices() }, [])
 
   async function fetchPrices() {
     setLoading(true)
@@ -20,93 +18,237 @@ export default function Prices() {
     setLoading(false)
   }
 
-  const categories = ['all', 'grain', 'veg', 'fruit', 'cash']
+  const categories = [
+    { key: 'all', label: 'All crops', icon: '🌾' },
+    { key: 'grain', label: 'Grains', icon: '🌽' },
+    { key: 'veg', label: 'Vegetables', icon: '🥬' },
+    { key: 'fruit', label: 'Fruits', icon: '🍌' },
+    { key: 'cash', label: 'Cash crops', icon: '☕' },
+  ]
 
   const filtered = category === 'all'
     ? prices
     : prices.filter(p => p.category === category)
 
-  function getBest(row) {
-    const vals = { Kampala: row.kampala, Gulu: row.gulu, Mbale: row.mbale, Mbarara: row.mbarara }
-    return Object.entries(vals).sort((a, b) => b[1] - a[1])[0][0]
+  function getBestCity(row) {
+    const vals = {
+      Kampala: row.kampala,
+      Gulu: row.gulu,
+      Mbale: row.mbale,
+      Mbarara: row.mbarara
+    }
+    return Object.entries(vals).sort((a, b) => b[1] - a[1])[0]
   }
 
+  const cities = ['Kampala', 'Gulu', 'Mbale', 'Mbarara']
+  const cityKeys = ['kampala', 'gulu', 'mbale', 'mbarara']
+  const cityShort = ['KLA', 'GUL', 'MBL', 'MBR']
+
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl font-bold text-[#1B6B45]">Market prices</h1>
-        <span className="text-xs text-gray-400">Live · Updated today</span>
-      </div>
-      <p className="text-sm text-gray-500 mb-4">
-        Real-time prices across Uganda's major markets
-      </p>
+    <div style={{ background: '#080C0A', minHeight: '100vh', paddingBottom: '80px' }}>
 
-      {/* Category filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
-        {categories.map(cat => (
-          <button key={cat} onClick={() => setCategory(cat)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap border transition-all ${
-              category === cat
-                ? 'bg-[#1B6B45] text-white border-[#1B6B45]'
-                : 'bg-white text-gray-500 border-gray-200'
-            }`}>
-            {cat === 'all' ? 'All crops' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-          </button>
-        ))}
-      </div>
+      {/* Background glow */}
+      <div style={{
+        position: 'fixed', inset: 0,
+        backgroundImage: `radial-gradient(circle at 20% 30%, rgba(27,107,69,0.08) 0%, transparent 50%)`,
+        pointerEvents: 'none', zIndex: 0
+      }} />
 
-      {loading ? (
-        <div className="text-center py-12 text-gray-400">Loading prices...</div>
-      ) : (
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-          {/* Table header */}
-          <div className="grid grid-cols-6 gap-2 px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <div className="col-span-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Crop</div>
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">KLA</div>
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">GUL</div>
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">MBL</div>
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">MBR</div>
+      {/* Header */}
+      <div style={{
+        background: 'linear-gradient(180deg, #0D1610 0%, #080C0A 100%)',
+        padding: '20px 20px 0',
+        position: 'relative', zIndex: 1
+      }}>
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <h1 style={{
+                fontSize: '24px', fontWeight: '800',
+                color: '#FFFFFF', marginBottom: '4px',
+                letterSpacing: '-0.3px'
+              }}>
+                Market Prices
+              </h1>
+              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
+                Live prices across Uganda's major markets
+              </p>
+            </div>
+            <div style={{
+              background: 'rgba(27,107,69,0.2)',
+              border: '1px solid rgba(27,107,69,0.4)',
+              borderRadius: '10px', padding: '6px 12px',
+              fontSize: '11px', fontWeight: '700',
+              color: '#4DC882'
+            }}>
+              LIVE
+            </div>
           </div>
+        </div>
 
-          {filtered.map((row, i) => {
-            const best = getBest(row)
-            const cities = { Kampala: row.kampala, Gulu: row.gulu, Mbale: row.mbale, Mbarara: row.mbarara }
-            const maxVal = Math.max(...Object.values(cities))
+        {/* Category chips */}
+        <div style={{
+          display: 'flex', gap: '8px',
+          overflowX: 'auto', paddingBottom: '16px',
+          scrollbarWidth: 'none'
+        }}>
+          {categories.map(cat => (
+            <button
+              key={cat.key}
+              onClick={() => setCategory(cat.key)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '7px 14px', borderRadius: '999px',
+                whiteSpace: 'nowrap', cursor: 'pointer',
+                background: category === cat.key
+                  ? 'linear-gradient(135deg, #C9A84C, #A8873A)'
+                  : 'rgba(255,255,255,0.06)',
+                border: category === cat.key
+                  ? 'none'
+                  : '1px solid rgba(255,255,255,0.1)',
+                fontSize: '12px', fontWeight: '700',
+                color: category === cat.key ? '#080C0A' : 'rgba(255,255,255,0.5)'
+              }}>
+              <span style={{ fontSize: '14px' }}>{cat.icon}</span>
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-            return (
-              <div key={row.id} className={`grid grid-cols-6 gap-2 px-4 py-3 border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                <div className="col-span-2 flex items-center gap-2">
-                  <span className="text-lg">{row.emoji}</span>
-                  <div>
-                    <div className="text-xs font-semibold text-gray-900">{row.crop_name}</div>
-                    <div className={`text-[10px] font-medium ${
-                      row.trend === 'up' ? 'text-green-600' :
-                      row.trend === 'down' ? 'text-red-500' : 'text-gray-400'
-                    }`}>
-                      {row.trend === 'up' ? '↑ Rising' : row.trend === 'down' ? '↓ Falling' : '→ Stable'}
+      <div style={{ padding: '16px 20px', position: 'relative', zIndex: 1 }}>
+
+        {/* Price alert */}
+        <div style={{
+          background: 'rgba(201,168,76,0.08)',
+          border: '1px solid rgba(201,168,76,0.2)',
+          borderRadius: '16px', padding: '14px 16px',
+          display: 'flex', alignItems: 'center', gap: '12px',
+          marginBottom: '20px'
+        }}>
+          <span style={{ fontSize: '20px' }}>📈</span>
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontSize: '11px', fontWeight: '700',
+              color: '#C9A84C', letterSpacing: '0.08em'
+            }}>
+              SMART INSIGHT
+            </div>
+            <div style={{
+              fontSize: '13px', color: 'rgba(255,255,255,0.7)',
+              marginTop: '2px', lineHeight: '1.4'
+            }}>
+              Maize prices in Kampala rose 12% this week. Best time to sell.
+            </div>
+          </div>
+        </div>
+
+        {/* City headers */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
+          gap: '4px', padding: '0 4px',
+          marginBottom: '8px'
+        }}>
+          <div style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em' }}>
+            CROP
+          </div>
+          {cityShort.map(c => (
+            <div key={c} style={{
+              fontSize: '10px', fontWeight: '700',
+              color: 'rgba(255,255,255,0.25)',
+              letterSpacing: '0.08em', textAlign: 'center'
+            }}>
+              {c}
+            </div>
+          ))}
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>📊</div>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '14px' }}>
+              Loading live prices...
+            </p>
+          </div>
+        ) : (
+          <div style={{
+            background: '#111614',
+            border: '1px solid rgba(201,168,76,0.1)',
+            borderRadius: '20px', overflow: 'hidden'
+          }}>
+            {filtered.map((row, i) => {
+              const [bestCity, bestVal] = getBestCity(row)
+              return (
+                <div key={row.id} style={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
+                  gap: '4px',
+                  padding: '14px 16px',
+                  borderBottom: i < filtered.length - 1
+                    ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                  background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'
+                }}>
+                  {/* Crop name */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '20px' }}>{row.emoji}</span>
+                    <div>
+                      <div style={{
+                        fontSize: '13px', fontWeight: '700',
+                        color: '#FFFFFF', lineHeight: '1.2'
+                      }}>
+                        {row.crop_name}
+                      </div>
+                      <div style={{
+                        fontSize: '10px', fontWeight: '600', marginTop: '2px',
+                        color: row.trend === 'up' ? '#4DC882'
+                          : row.trend === 'down' ? '#F87171'
+                          : 'rgba(255,255,255,0.3)'
+                      }}>
+                        {row.trend === 'up' ? '↑ Rising'
+                          : row.trend === 'down' ? '↓ Falling'
+                          : '→ Stable'}
+                      </div>
                     </div>
                   </div>
-                </div>
-                {[row.kampala, row.gulu, row.mbale, row.mbarara].map((val, idx) => (
-                  <div key={idx} className={`text-xs font-medium ${val === maxVal ? 'text-[#1B6B45] font-bold' : 'text-gray-400'}`}>
-                    {val?.toLocaleString()}
-                  </div>
-                ))}
-              </div>
-            )
-          })}
-        </div>
-      )}
 
-      {/* Price alert */}
-      <div className="mt-4 bg-[#E8F7EE] border border-green-200 rounded-2xl p-4 flex gap-3">
-        <span className="text-xl">💡</span>
-        <div>
-          <div className="font-semibold text-sm text-[#1B6B45]">Smart insight</div>
-          <div className="text-xs text-[#2A9660] mt-0.5 leading-relaxed">
-            Maize prices in Kampala have risen 12% this week. If you have stock ready, now is the best time to sell.
+                  {/* City prices */}
+                  {cityKeys.map((key, idx) => {
+                    const val = row[key]
+                    const isBest = val === bestVal
+                    return (
+                      <div key={key} style={{ textAlign: 'center' }}>
+                        <div style={{
+                          fontSize: '12px', fontWeight: isBest ? '800' : '500',
+                          color: isBest ? '#C9A84C' : 'rgba(255,255,255,0.35)',
+                          lineHeight: '1.2'
+                        }}>
+                          {val?.toLocaleString()}
+                        </div>
+                        {isBest && (
+                          <div style={{
+                            fontSize: '9px', fontWeight: '700',
+                            color: '#C9A84C', marginTop: '2px'
+                          }}>
+                            BEST
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })}
           </div>
-          <div className="text-xs text-green-400 mt-1">Powered by AgriBridge Market Intelligence</div>
+        )}
+
+        {/* Footer note */}
+        <div style={{
+          textAlign: 'center', marginTop: '16px',
+          fontSize: '11px', color: 'rgba(255,255,255,0.2)',
+          fontStyle: 'italic'
+        }}>
+          Powered by AgriBridge Market Intelligence · Prices in UGX per kg
         </div>
       </div>
     </div>
