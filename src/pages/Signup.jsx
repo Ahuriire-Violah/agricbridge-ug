@@ -73,7 +73,7 @@ export default function Signup() {
     let farmer_id = null
     if (isFarmer) {
       const initials = form.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
-      const { data: farmer } = await supabase
+      const { data: farmer, error: farmerError } = await supabase
         .from('farmers')
         .insert({
           name: form.full_name,
@@ -85,8 +85,14 @@ export default function Signup() {
           orders_completed: 0,
           rating: 5.0
         })
-        .select()
+        .select('id')
         .single()
+
+      if (farmerError) {
+        setError('Could not create farmer profile. Please try again.')
+        setLoading(false)
+        return
+      }
       farmer_id = farmer?.id
     }
 
